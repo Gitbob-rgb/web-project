@@ -8,14 +8,25 @@ class PiloteModel {
         $this->db = Database::getInstance()->getConnection();
     }
     
-    public function getAllPilotes() {
-        try {
-            $stmt = $this->db->prepare("SELECT * FROM utilisateurs WHERE role = 'pilote' ORDER BY email");
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            return [];
-        }
+    public function getAllPilotes($page = 1, $perPage = 10) {
+        $offset = ($page - 1) * $perPage;
+        
+        // Get total count
+        $countQuery = "SELECT COUNT(*) as total FROM utilisateurs WHERE role = 'pilote'";
+        $countStmt = $this->db->query($countQuery);
+        $totalCount = $countStmt->fetch()['total'];
+        
+        $query = "SELECT * FROM utilisateurs WHERE role = 'pilote' ORDER BY email LIMIT :limit OFFSET :offset";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return [
+            'data' => $stmt->fetchAll(),
+            'total' => $totalCount,
+            'pages' => ceil($totalCount / $perPage)
+        ];
     }
     
     public function searchPilotes($keyword) {
@@ -210,4 +221,4 @@ class PiloteModel {
             return [];
         }
     }
-} 
+}

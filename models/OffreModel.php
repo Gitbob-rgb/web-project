@@ -8,16 +8,31 @@ class OffreModel {
         $this->db = Database::getInstance()->getConnection();
     }
     
-    public function getAllOffres() {
-        $query = "SELECT o.*, e.nom as entreprise_nom, COUNT(c.id) as candidature_count
+    public function getAllOffres($page = 1, $perPage = 10) {
+        $offset = ($page - 1) * $perPage;
+        
+        // Get total count
+        $countQuery = "SELECT COUNT(*) as total FROM offres_stage";
+        $countStmt = $this->db->query($countQuery);
+        $totalCount = $countStmt->fetch()['total'];
+        
+        $query = "SELECT o.*, e.nom as entreprise_nom, 
+                 (SELECT COUNT(*) FROM candidatures c WHERE c.offre_stage_id = o.id) as candidature_count
                  FROM offres_stage o
                  LEFT JOIN entreprises e ON o.entreprise_id = e.id
-                 LEFT JOIN candidatures c ON o.id = c.offre_stage_id
-                 GROUP BY o.id
-                 ORDER BY o.id DESC";
+                 ORDER BY o.date_creation DESC
+                 LIMIT :limit OFFSET :offset";
+                 
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
         
-        $stmt = $this->db->query($query);
-        return $stmt->fetchAll();
+        return [
+            'data' => $stmt->fetchAll(),
+            'total' => $totalCount,
+            'pages' => ceil($totalCount / $perPage)
+        ];
     }
     
     public function searchOffres($keyword) {
@@ -198,4 +213,4 @@ class OffreModel {
         }
     }
 }
-?> 
+?>

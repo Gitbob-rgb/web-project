@@ -251,6 +251,33 @@
                 <?php endif; ?>
             </tbody>
         </table>
+        
+        <div class="pagination">
+            <?php if (isset($pagination) && $pagination['pages'] > 1): ?>
+                <div class="pagination-info" style="text-align: center; margin-bottom: 1rem;">
+                    Affichage de <?php echo ($pagination['current'] - 1) * 10 + 1 ?> à 
+                    <?php echo min($pagination['current'] * 10, $pagination['total']) ?> 
+                    sur <?php echo $pagination['total'] ?> étudiants
+                </div>
+                
+                <?php if ($pagination['current'] > 1): ?>
+                    <a href="index.php?page=liste_etudiant&page_num=1<?php echo isset($_GET['search']) ? '&search=' . htmlspecialchars($_GET['search']) : ''; ?>" title="Première page">&laquo;</a>
+                    <a href="index.php?page=liste_etudiant&page_num=<?php echo ($pagination['current'] - 1); ?><?php echo isset($_GET['search']) ? '&search=' . htmlspecialchars($_GET['search']) : ''; ?>" title="Page précédente">&#8249;</a>
+                <?php endif; ?>
+                
+                <?php for ($i = max(1, $pagination['current'] - 2); $i <= min($pagination['pages'], $pagination['current'] + 2); $i++): ?>
+                    <a href="index.php?page=liste_etudiant&page_num=<?php echo $i; ?><?php echo isset($_GET['search']) ? '&search=' . htmlspecialchars($_GET['search']) : ''; ?>" 
+                       class="<?php echo $pagination['current'] == $i ? 'active' : ''; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <?php if ($pagination['current'] < $pagination['pages']): ?>
+                    <a href="index.php?page=liste_etudiant&page_num=<?php echo ($pagination['current'] + 1); ?><?php echo isset($_GET['search']) ? '&search=' . htmlspecialchars($_GET['search']) : ''; ?>" title="Page suivante">&#8250;</a>
+                    <a href="index.php?page=liste_etudiant&page_num=<?php echo $pagination['pages']; ?><?php echo isset($_GET['search']) ? '&search=' . htmlspecialchars($_GET['search']) : ''; ?>" title="Dernière page">&raquo;</a>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
-</html> 
+</html>

@@ -8,10 +8,25 @@ class EtudiantModel {
         $this->db = Database::getInstance()->getConnection();
     }
     
-    public function getAllEtudiants() {
-        $stmt = $this->db->prepare("SELECT * FROM utilisateurs WHERE role = 'etudiant' ORDER BY email");
+    public function getAllEtudiants($page = 1, $perPage = 10) {
+        $offset = ($page - 1) * $perPage;
+        
+        // Get total count
+        $countQuery = "SELECT COUNT(*) as total FROM utilisateurs WHERE role = 'etudiant'";
+        $countStmt = $this->db->query($countQuery);
+        $totalCount = $countStmt->fetch()['total'];
+        
+        $query = "SELECT * FROM utilisateurs WHERE role = 'etudiant' ORDER BY email LIMIT :limit OFFSET :offset";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return [
+            'data' => $stmt->fetchAll(),
+            'total' => $totalCount,
+            'pages' => ceil($totalCount / $perPage)
+        ];
     }
     
     public function searchEtudiants($keyword) {
@@ -159,4 +174,4 @@ class EtudiantModel {
             return [];
         }
     }
-} 
+}
