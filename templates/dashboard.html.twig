@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="dashboard-container">
+        {# ... your existing dashboard content ... #}
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; {{ "now"|date("Y") }} - Tous droits réservés</p>
+                <nav class="footer-nav">
+                    <a href="{{ path('about') }}">À propos</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+{% endblock %}
